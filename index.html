@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Lucro - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>Controle de Lucro</h1>
+                <p>Gerencie seus lucros de forma simples e eficiente</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="tabs">
+                    <button class="tab active" id="login-tab">Login</button>
+                    <button class="tab" id="register-tab">Cadastro</button>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- Formulário de Login -->
+                    <form id="login-form" class="active">
+                        <div class="form-group">
+                            <label for="login-email">E-mail</label>
+                            <input type="email" id="login-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Senha</label>
+                            <input type="password" id="login-password" required placeholder="Sua senha">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Entrar
+                        </button>
+                        <div id="login-message" class="message"></div>
+                    </form>
+                    
+                    <!-- Formulário de Cadastro -->
+                                         <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-name">Nome</label>
+                            <input type="text" id="register-name" required placeholder="Seu nome completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">E-mail</label>
+                            <input type="email" id="register-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Senha</label>
+                            <input type="password" id="register-password" required placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password">Confirmar Senha</label>
+                            <input type="password" id="register-confirm-password" required placeholder="Repita a senha">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Criar Conta
+                        </button>
+                        <div id="register-message" class="message"></div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="features">
+                <h3><i class="fas fa-star"></i> Funcionalidades do Sistema</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Controle de vendas de salgados</li>
+                    <li><i class="fas fa-check"></i> Registro de custos (trigo, óleo, etc.)</li>
+                    <li><i class="fas fa-check"></i> Cálculo automático de lucro</li>
+                    <li><i class="fas fa-check"></i> Relatórios e gráficos detalhados</li>
+                    <li><i class="fas fa-check"></i> Controle de estoque de ingredientes</li>
+                    <li><i class="fas fa-check"></i> Acesso online de qualquer lugar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Controle das abas
+        document.getElementById('login-tab').addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content form').forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('login-form').classList.add('active');
+        });
+        
+        document.getElementById('register-tab').addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content form').forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('register-form').classList.add('active');
+        });
+        
+        // Formulário de login
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const messageDiv = document.getElementById('login-message');
+            messageDiv.textContent = 'Entrando...';
+            messageDiv.className = 'message info';
+            
+            const success = await login(email, password);
+            if (success) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+        
+        // Formulário de cadastro
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            const messageDiv = document.getElementById('register-message');
+            
+            if (password !== confirmPassword) {
+                messageDiv.textContent = 'As senhas não coincidem!';
+                messageDiv.className = 'message error';
+                return;
+            }
+            
+            messageDiv.textContent = 'Criando conta...';
+            messageDiv.className = 'message info';
+            
+            const success = await register(email, password, name);
+            if (success) {
+                messageDiv.textContent = 'Conta criada com sucesso! Faça login.';
+                messageDiv.className = 'message success';
+                // Voltar para aba de login
+                document.getElementById('login-tab').click();
+                document.getElementById('login-email').value = email;
+            }
+        });
+    </script>
+</body>
+</html>

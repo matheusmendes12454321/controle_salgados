@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Controle de Salgados</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h2>Salgados<span>Pro</span></h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <span id="user-name">Usuário</span>
+                    <small id="user-email">email@exemplo.com</small>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="active"><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="registrar-venda.html"><i class="fas fa-cash-register"></i> Registrar Venda</a></li>
+                <li><a href="registrar-custo.html"><i class="fas fa-shopping-cart"></i> Registrar Custo</a></li>
+                <li><a href="produtos.html"><i class="fas fa-hamburger"></i> Produtos</a></li>
+                <li><a href="estoque.html"><i class="fas fa-boxes"></i> Estoque</a></li>
+                <li><a href="historico.html"><i class="fas fa-history"></i> Histórico</a></li>
+                <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="lucro-total">
+                    <span>Lucro Total</span>
+                    <h3 id="total-profit">R$ 0,00</h3>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <header class="header">
+                <h1>Dashboard</h1>
+                <div class="date-info">
+                    <span id="current-date">Carregando...</span>
+                </div>
+            </header>
+            
+            <div class="stats-cards">
+                <div class="card stat-card">
+                    <div class="card-icon entrada">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Vendas do Mês</h3>
+                        <p id="vendas-mes">R$ 0,00</p>
+                        <small id="vendas-variacao">+0% em relação ao mês anterior</small>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="card-icon saida">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Custos do Mês</h3>
+                        <p id="custos-mes">R$ 0,00</p>
+                        <small id="custos-variacao">+0% em relação ao mês anterior</small>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="card-icon lucro">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Lucro do Mês</h3>
+                        <p id="lucro-mes">R$ 0,00</p>
+                        <small id="lucro-variacao">+0% em relação ao mês anterior</small>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="card-icon produto">
+                        <i class="fas fa-hamburger"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Produto Mais Vendido</h3>
+                        <p id="produto-top">-</p>
+                        <small id="produto-quantidade">0 unidades</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-charts">
+                <div class="card chart-card">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição de Custos</h3>
+                    <canvas id="custosChart"></canvas>
+                </div>
+                
+                <div class="card chart-card">
+                    <h3><i class="fas fa-chart-line"></i> Vendas dos Últimos 7 Dias</h3>
+                    <canvas id="vendasChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <div class="card">
+                    <h3><i class="fas fa-clock"></i> Atividade Recente</h3>
+                    <div class="table-responsive">
+                        <table id="recent-transactions">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- As transações serão carregadas aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="historico.html" class="btn-link">Ver todo histórico <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+        // Verificar autenticação
+        checkAuth();
+        
+        // Carregar dados do usuário
+        loadUserData();
+        
+        // Carregar dados do dashboard
+        loadDashboardData();
+        
+        // Configurar data atual
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('pt-BR', options);
+        
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            await logout();
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
